@@ -1,16 +1,22 @@
-function output = outline_inflation(input, thickness)
+function output = outline_inflation(input, round_erode, round_dilate, patch_size, avg_scale, dist_scale)
     arguments
         input;
-        thickness int32 = 4;
+        round_erode int32 = 5;
+        round_dilate int32 = 7;
+        patch_size int32 = 16;
+        avg_scale int32 = 12;
+        dist_scale int32 = 5;
     end
-    img_gray = rgb2gray(input);
-    avg_brightness = avgchunk(img_gray, 16, 16);
-    weight = sigmoid((avg_brightness-0.5)*5);
+    % weight
+    weight = inflation_weight(input, patch_size*2, patch_size*2, avg_scale, dist_scale);
+    weight = imgaussfilt(weight, 2);
     
     img_erode = input;
     img_dilate = input;
-    for i = 1:thickness
+    for i = 1:round_erode
         img_erode = imerode(img_erode, [0 1 0; 1 1 1; 0 1 0]);
+    end
+    for i = 1:round_dilate
         img_dilate = imdilate(img_dilate, [0 1 0; 1 1 1; 0 1 0]);
     end
     % imshow(img_erode);
