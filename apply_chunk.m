@@ -1,10 +1,10 @@
-function output = apply_chunk(input, k, s, func)
+function output = apply_chunk(input, k, func)
     arguments
         input;
         k int32 = 3;
-        s int32 = 1;
         func function_handle = @mean2;
     end
+    s = k;
     [h, w] = size(input);
     h = ceil(h/s) * s;
     w = ceil(w/s) * s;

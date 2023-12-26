@@ -8,8 +8,7 @@ function output = outline_inflation(input, round_erode, round_dilate, patch_size
         dist_scale int32 = 5;
     end
     % weight
-    weight = inflation_weight(input, patch_size*2, patch_size*2, avg_scale, dist_scale);
-    weight = imgaussfilt(weight, 2);
+    weight = inflation_weight(input, patch_size*2, avg_scale, dist_scale);
     
     img_erode = input;
     img_dilate = input;
@@ -19,6 +18,8 @@ function output = outline_inflation(input, round_erode, round_dilate, patch_size
     for i = 1:round_dilate
         img_dilate = imdilate(img_dilate, [0 1 0; 1 1 1; 0 1 0]);
     end
-    % imshow(img_erode);
+    % figure();
+    % subplot(1, 2, 1); imshow(img_erode); title('erode');
+    % subplot(1, 2, 2); imshow(img_dilate); title('dilate');
     output = img_erode .* weight + img_dilate .* (1 - weight);
 end
