@@ -1,4 +1,4 @@
-function output = inflation_weight(input, k, avg_scale, dist_scale)
+function output = expansion_weight(input, k, avg_scale, dist_scale)
     arguments
         input;
         k int32 = 16;

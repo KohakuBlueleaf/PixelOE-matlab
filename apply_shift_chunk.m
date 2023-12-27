@@ -19,6 +19,8 @@ function output = apply_shift_chunk(input, k, func)
     for i = 0 : floor((size(input, 1) - k)/s)-1
         output(i*s+1+k/2:i*s+k+k/2, 1:k/2) = func(input(i*s+1+k/2:i*s+k+k/2, 1:k/2));
         output(i*s+1+k/2:i*s+k+k/2, w-k/2+1:w) = func(input(i*s+1+k/2:i*s+k+k/2, w-k/2+1:w));
+    end
+    for i = 0 : floor((size(input, 2) - k)/s)-1
         output(1:k/2, i*s+1+k/2:i*s+k+k/2) = func(input(1:k/2, i*s+1+k/2:i*s+k+k/2));
         output(h-k/2+1:h, i*s+1+k/2:i*s+k+k/2) = func(input(h-k/2+1:h, i*s+1+k/2:i*s+k+k/2));
     end

@@ -11,11 +11,12 @@ function output = pixelize(input, target_size, resize_method, thickness, color_m
     
     % Before downscale
     % The operation that should be applied before downscale
-    % Outline inflation
+    % Outline expansion
     % Color palette choice
     img = input;
+    img = imgaussfilt(img, 0.5);
     if thickness > 0
-        img = outline_inflation(img, thickness, thickness, patch_size, 12, 3);
+        img = outline_expansion(img, thickness, thickness, patch_size, 12, 3);
     end
     if color_matching
         img = match_color(img, input);
@@ -29,7 +30,8 @@ function output = pixelize(input, target_size, resize_method, thickness, color_m
     % After downscale
     % Apply color palette
     % Apply dithering
-    % img_sm = sharpening(img_sm, 1);
+    % img_sm = imgaussfilt(img_sm, 0.5);
+    % img_sm = sharpening(img_sm, 2);
     % [~, centers] = imsegkmeans(img_sm, 64);
     % color_map = min(max(centers, 0), 1);
     % img_sm = rgb2ind(img_sm, double(color_map), 'dither');
