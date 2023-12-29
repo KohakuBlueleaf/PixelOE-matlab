@@ -1,16 +1,22 @@
-img_name = "00673";
+img_name = "00813";
 img_original = imread('image/' + img_name + ".png");
 patch_size = 8;
-for pix_size = 128:128:384
-    img = resize(img_original, pix_size * patch_size, 'bicubic', patch_size*2);
-    pixelized_nearest3 = pixelize(img, pix_size, 'nearest', 2, false, patch_size);
-    pixelized_nearest3_cm = pixelize(img, pix_size, 'nearest', 2, true, patch_size);
+for settings = [64, 96, 128; 3 3 3]
+    pix_size = settings(1);
+    expand = settings(2);
+    disp(settings);
+    
+    img = resize(img_original, pix_size * patch_size, 'bicubic', patch_size);
+    pixelized_nearest3 = pixelize(img, pix_size, 'nearest', expand, false, patch_size);
+    pixelized_nearest3_cm = pixelize(img, pix_size, 'nearest', expand, true, patch_size);
     imwrite(pixelized_nearest3, 'image/' + img_name + '-' + num2str(pix_size*4) + "_pixelized_matlab.png");
     imwrite(pixelized_nearest3_cm, 'image/' + img_name + '-' + num2str(pix_size*4) + "_pixelized_cm_matlab.png");
 end
 
-% pix_size = 64;
+% pix_size = 96;
 % img = resize(img_original, pix_size * patch_size, 'bicubic', patch_size);
+% pixelized_nearest3 = pixelize(img, pix_size, 'nearest', 3, false, patch_size);
+% pixelized_nearest3_cm = pixelize(img, pix_size, 'nearest', 3, true, patch_size);
 % figure();
 % subplot(1, 4, 1); imshow(img);
 % subplot(1, 4, 2); imshow(pixelized_nearest3); title('without color matching');

@@ -14,9 +14,8 @@ function output = pixelize(input, target_size, resize_method, thickness, color_m
     % Outline expansion
     % Color palette choice
     img = input;
-    img = imgaussfilt(img, 0.5);
     if thickness > 0
-        img = outline_expansion(img, thickness, thickness, patch_size, 12, 3);
+        img = outline_expansion(img, thickness, thickness, patch_size, 9, 4);
     end
     if color_matching
         img = match_color(img, input);
@@ -25,7 +24,14 @@ function output = pixelize(input, target_size, resize_method, thickness, color_m
     
     % downscale
     % Different downscale method may have Different result
-    img_sm = resize(img, target_size, resize_method);
+    img_lab = rgb2lab(img);
+    img_lab(:, :, 1) = apply_chunk_new(img_lab(:, :, 1), patch_size/2, patch_size/2, @find_pixel);
+    img_lab(:, :, 2) = apply_chunk_new(img_lab(:, :, 2), patch_size/2, patch_size/2, @median2);
+    img_lab(:, :, 3) = apply_chunk_new(img_lab(:, :, 3), patch_size/2, patch_size/2, @median2);
+    img = lab2rgb(img_lab);
+    % imshow(img);
+    img_sm = resize(img, target_size, resize_method, patch_size);
+    % img_sm = chunk_mean_downsample(img, patch_size);
     
     % After downscale
     % Apply color palette
@@ -42,3 +48,40 @@ function output = pixelize(input, target_size, resize_method, thickness, color_m
     output = uint8(img_lg*255);
 end
 
+
+function output = chunk_mean_downsample(img, chunk_size)
+    [h, w, ~] = size(img);
+    h = h / chunk_size;
+    w = w / chunk_size;
+    output = zeros([h w]);
+    x = 0;
+    for i = 1:chunk_size:size(img, 1)
+        y = 0;
+        x = x + 1;
+        for j = 1:chunk_size:size(img, 2)
+            y = y + 1;
+            chunk = img(i:i+chunk_size-1, j:j+chunk_size-1, :);
+            output(x, y, 1) = mean2(chunk(:, :, 1));
+            output(x, y, 2) = mean2(chunk(:, :, 2));
+            output(x, y, 3) = mean2(chunk(:, :, 3));
+        end
+    end
+end
+
+
+function output = find_pixel(chunk)
+    med = median(median(chunk));
+    mu = mean(mean(chunk));
+    maximum = max(max(chunk));
+    minimum = min(min(chunk));
+    if med < mu || maximum - mu > mu - minimum
+        output = minimum;
+    else
+        output = maximum;
+    end
+end
+
+
+function output = median2(chunk)
+    output = median(median(chunk));
+end

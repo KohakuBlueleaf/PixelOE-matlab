@@ -6,25 +6,27 @@ function output = expansion_weight(input, k, avg_scale, dist_scale)
         dist_scale single = 3;
     end
     img_gray = rgb2gray(input);
-    avg_brightness = apply_chunk(img_gray, k, @mean2);
-    max_brightness = apply_chunk(img_gray, k, @maximum2);
-    min_brightness = apply_chunk(img_gray, k, @minimum2);
+    avg_brightness = apply_chunk_new(img_gray, k*2, k, @mean2);
+    max_brightness = apply_chunk_new(img_gray, k*2, k, @maximum2);
+    min_brightness = apply_chunk_new(img_gray, k*2, k, @minimum2);
     bright_distance = max_brightness - avg_brightness;
     dark_distance = avg_brightness - min_brightness;
     
-    shift_avg_brightness = apply_shift_chunk(img_gray, k, @mean2);
-    shift_max_brightness = apply_shift_chunk(img_gray, k, @maximum2);
-    shift_min_brightness = apply_shift_chunk(img_gray, k, @minimum2);
-    shift_bright_distance = shift_max_brightness - shift_avg_brightness;
-    shift_dark_distance = shift_avg_brightness - shift_min_brightness;
+    % shift_avg_brightness = apply_shift_chunk(img_gray, k, @mean2);
+    % shift_max_brightness = apply_shift_chunk(img_gray, k, @maximum2);
+    % shift_min_brightness = apply_shift_chunk(img_gray, k, @minimum2);
+    % shift_bright_distance = shift_max_brightness - shift_avg_brightness;
+    % shift_dark_distance = shift_avg_brightness - shift_min_brightness;
     
     weight = (avg_brightness-0.5)*avg_scale;
     weight = weight - (bright_distance-dark_distance)*dist_scale;
-    shift_weight = (shift_avg_brightness-0.5)*avg_scale;
-    shift_weight = shift_weight - (shift_bright_distance-shift_dark_distance)*dist_scale;
-    % imshow(shift_weight);
-    output = sigmoid((weight+shift_weight)/2);
-    output = apply_shift_chunk(output, k/2, @interpolate);
+    % shift_weight = (shift_avg_brightness-0.5)*avg_scale;
+    % shift_weight = shift_weight - (shift_bright_distance-shift_dark_distance)*dist_scale;
+    % weight = (weight+shift_weight)/2;
+    
+    output = sigmoid(weight);
+    output = imresize(output, 1/single(k), 'nearest');
+    output = imresize(output, k, "bilinear");
     output = output - minimum2(output);
     output = output / maximum2(output);
 end

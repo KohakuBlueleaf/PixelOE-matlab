@@ -1,11 +1,11 @@
 img = imread('image/00813.png');
-pix_size = 128;
+pix_size = 64;
 patch_size = 8;
 img = resize(img, pix_size * patch_size, 'bicubic', patch_size);
 img = single(img)/255;
-weight = expansion_weight(img, patch_size*2, 6, 3);
+weight = expansion_weight(img, patch_size, 9, 4);
 
-edge = outline_expansion(img, 3, 3, patch_size, 6, 3)-img;
+edge = outline_expansion(img, 2, 3, patch_size, 9, 4)-img;
 edge = (edge+1)./2;
 edge(abs(edge-0.5) < 0.01) = 1.0;
 
