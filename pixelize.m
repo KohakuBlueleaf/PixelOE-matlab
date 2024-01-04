@@ -25,9 +25,9 @@ function output = pixelize(input, target_size, resize_method, thickness, color_m
     % downscale
     % Different downscale method may have Different result
     img_lab = rgb2lab(img);
-    img_lab(:, :, 1) = apply_chunk_new(img_lab(:, :, 1), patch_size/2, patch_size/2, @find_pixel);
-    img_lab(:, :, 2) = apply_chunk_new(img_lab(:, :, 2), patch_size/2, patch_size/2, @median2);
-    img_lab(:, :, 3) = apply_chunk_new(img_lab(:, :, 3), patch_size/2, patch_size/2, @median2);
+    img_lab(:, :, 1) = apply_chunk_new(img_lab(:, :, 1), patch_size, patch_size, @find_pixel);
+    img_lab(:, :, 2) = apply_chunk_new(img_lab(:, :, 2), patch_size, patch_size, @median2);
+    img_lab(:, :, 3) = apply_chunk_new(img_lab(:, :, 3), patch_size, patch_size, @median2);
     img = lab2rgb(img_lab);
     % imshow(img);
     img_sm = resize(img, target_size, resize_method, patch_size);
@@ -36,7 +36,6 @@ function output = pixelize(input, target_size, resize_method, thickness, color_m
     % After downscale
     % Apply color palette
     % Apply dithering
-    % img_sm = imgaussfilt(img_sm, 0.5);
     % img_sm = sharpening(img_sm, 2);
     % [~, centers] = imsegkmeans(img_sm, 64);
     % color_map = min(max(centers, 0), 1);

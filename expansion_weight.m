@@ -6,9 +6,9 @@ function output = expansion_weight(input, k, avg_scale, dist_scale)
         dist_scale single = 3;
     end
     img_gray = rgb2gray(input);
-    avg_brightness = apply_chunk_new(img_gray, k*2, k, @mean2);
-    max_brightness = apply_chunk_new(img_gray, k*2, k, @maximum2);
-    min_brightness = apply_chunk_new(img_gray, k*2, k, @minimum2);
+    avg_brightness = apply_chunk_new(img_gray, k*3, k, @mean2);
+    max_brightness = apply_chunk_new(img_gray, k*3, k, @maximum2);
+    min_brightness = apply_chunk_new(img_gray, k*3, k, @minimum2);
     bright_distance = max_brightness - avg_brightness;
     dark_distance = avg_brightness - min_brightness;
     
@@ -26,7 +26,7 @@ function output = expansion_weight(input, k, avg_scale, dist_scale)
     
     output = sigmoid(weight);
     output = imresize(output, 1/single(k), 'nearest');
-    output = imresize(output, k, "bilinear");
+    output = imresize(output, k, "bicubic");
     output = output - minimum2(output);
     output = output / maximum2(output);
 end

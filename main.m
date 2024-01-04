@@ -1,7 +1,7 @@
 img_name = "00813";
 img_original = imread('image/' + img_name + ".png");
 patch_size = 8;
-for settings = [64, 96, 128; 3 3 3]
+for settings = [64, 96, 128; 2 3 3]
     pix_size = settings(1);
     expand = settings(2);
     disp(settings);
