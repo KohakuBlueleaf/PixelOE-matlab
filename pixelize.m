@@ -1,11 +1,13 @@
-function output = pixelize(input, target_size, resize_method, thickness, color_matching, patch_size)
+function output = pixelize(input, target_size, patch_size, thickness, color_matching, contrast, saturation, colors)
     arguments
         input uint8;
         target_size int32 = 128;
-        resize_method string = "bicubic";
-        thickness int32 = 5;
+        patch_size int32 = 8;
+        thickness int32 = 2;
         color_matching = true;
-        patch_size int32 = 16;
+        contrast single = 1.0;
+        saturation single = 1.0;
+        colors int32 = -1;
     end
     input = single(input)/255;
     
@@ -20,27 +22,29 @@ function output = pixelize(input, target_size, resize_method, thickness, color_m
     if color_matching
         img = match_color(img, input);
     end
-    % imshow(img);
     
     % downscale
-    % Different downscale method may have Different result
+    % Use median/mean and extremal value to determine the value we need
     img_lab = rgb2lab(img);
     img_lab(:, :, 1) = apply_chunk_new(img_lab(:, :, 1), patch_size, patch_size, @find_pixel);
     img_lab(:, :, 2) = apply_chunk_new(img_lab(:, :, 2), patch_size, patch_size, @median2);
     img_lab(:, :, 3) = apply_chunk_new(img_lab(:, :, 3), patch_size, patch_size, @median2);
     img = lab2rgb(img_lab);
-    % imshow(img);
-    img_sm = resize(img, target_size, resize_method, patch_size);
-    % img_sm = chunk_mean_downsample(img, patch_size);
+    img_sm = resize(img, target_size, 'nearest', patch_size);
     
     % After downscale
     % Apply color palette
     % Apply dithering
-    % img_sm = sharpening(img_sm, 2);
-    % [~, centers] = imsegkmeans(img_sm, 64);
-    % color_map = min(max(centers, 0), 1);
-    % img_sm = rgb2ind(img_sm, double(color_map), 'dither');
-    % img_sm = ind2rgb(img_sm, double(color_map));
+    if colors > 0
+        [~, centers] = imsegkmeans(img_sm, colors);
+        color_map = min(max(centers, 0), 1);
+        img_sm = rgb2ind(img_sm, double(color_map), 'dither');
+        img_sm = ind2rgb(img_sm, double(color_map));
+    end
+    % Modify contrast and saturation
+    if contrast ~= 1 || saturation
+        img_sm = color_styling(img_sm, saturation, contrast);
+    end
     
     % Reupscale use nearest to get "pixel" effect
     img_lg = imresize(img_sm, [size(input, 1), size(input, 2)], 'nearest');
@@ -48,39 +52,22 @@ function output = pixelize(input, target_size, resize_method, thickness, color_m
 end
 
 
-function output = chunk_mean_downsample(img, chunk_size)
-    [h, w, ~] = size(img);
-    h = h / chunk_size;
-    w = w / chunk_size;
-    output = zeros([h w]);
-    x = 0;
-    for i = 1:chunk_size:size(img, 1)
-        y = 0;
-        x = x + 1;
-        for j = 1:chunk_size:size(img, 2)
-            y = y + 1;
-            chunk = img(i:i+chunk_size-1, j:j+chunk_size-1, :);
-            output(x, y, 1) = mean2(chunk(:, :, 1));
-            output(x, y, 2) = mean2(chunk(:, :, 2));
-            output(x, y, 3) = mean2(chunk(:, :, 3));
-        end
-    end
-end
-
-
 function output = find_pixel(chunk)
-    med = median(median(chunk));
-    mu = mean(mean(chunk));
-    maximum = max(max(chunk));
-    minimum = min(min(chunk));
-    if med < mu || maximum - mu > mu - minimum
-        output = minimum;
-    else
-        output = maximum;
-    end
+    % med = median(chunk, 'all');
+    % mu = mean(chunk, 'all');
+    % maximum = max(max(chunk));
+    % minimum = min(min(chunk));
+    % output = med;
+    % if med < mu && maximum - med > med - minimum
+    %     output = minimum;
+    % elseif med > mu && maximum - med < med - minimum
+    %     output = maximum;
+    % end
+    [w, h] = size(chunk);
+    output = chunk(w/2, h/2);
 end
 
 
 function output = median2(chunk)
-    output = median(median(chunk));
+    output = median(chunk, 'all');
 end

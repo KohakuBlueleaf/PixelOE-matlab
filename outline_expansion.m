@@ -12,6 +12,7 @@ function output = outline_expansion(input, round_erode, round_dilate, patch_size
     
     % weight
     weight = expansion_weight(input, patch_size, avg_scale, dist_scale);
+    orig_weight = sigmoid((weight - 0.5) * 5) * 0.25;
     
     img_erode = input;
     img_dilate = input;
@@ -22,6 +23,7 @@ function output = outline_expansion(input, round_erode, round_dilate, patch_size
         img_dilate = imdilate(img_dilate, kernel_expansion);
     end
     output = img_erode .* weight + img_dilate .* (1 - weight);
+    output = output .* (1-orig_weight) + input .* orig_weight;
     
     % Use Opening and Closing to remove "white line inside black line" artifact
     for i = 1:round_erode
@@ -33,8 +35,4 @@ function output = outline_expansion(input, round_erode, round_dilate, patch_size
     for i = 1:round_erode
         output = imerode(output, kernel_smoothing);
     end
-    % figure();
-    % subplot(1, 3, 1); imshow(img_erode); title('erode');
-    % subplot(1, 3, 2); imshow(img_dilate); title('dilate');
-    % subplot(1, 3, 3); imshow(output); title('Ours');
 end
